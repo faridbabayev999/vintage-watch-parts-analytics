@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vintage Watch Spare Parts — Pricing Intelligence</title>
+    <!-- Google Fonts: Editorial Serif + Clean Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- Chart.js for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <!-- Top Header & Navigation -->
+    <header class="app-header">
+        <div class="header-container">
+            <div class="logo">
+
+            </div>
+            <nav class="top-nav">
+                <a href="#portfolio" class="nav-item active" id="nav-portfolio">Portfolio View</a>
+                <a href="#inventory" class="nav-item" id="nav-inventory">Inventory</a>
+                <a href="#add-item" class="nav-item" id="nav-add-item">Add Item</a>
+            </nav>
+            <div class="header-meta">
+
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="app-main">
+
+        <!-- 1. PORTFOLIO PAGE -->
+        <section id="portfolio-page" class="page-section">
+            <div class="section-header animate-fade-in"
+                style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <div>
+                    <h1>Portfolio Overview</h1>
+                    <p class="subtitle">A consolidated overview of stock holdings, liquidity profiles, and pricing
+                        coverage.</p>
+                </div>
+            </div>
+
+            <!-- KPI Metric Cards Grid -->
+            <div class="kpi-grid animate-fade-in delay-1">
+                <!-- 1. Total Inventory (Parts) -->
+                <div class="kpi-card total-parts">
+                    <div class="kpi-label">Total Inventory (Parts)</div>
+                    <div class="kpi-value" id="kpi-total-unique-parts">Loading...</div>
+                    <div class="kpi-subtext">All parts in stock</div>
+                </div>
+                <!-- 2. Priced Parts -->
+                <div class="kpi-card priced-parts">
+                    <div class="kpi-label">Priced Parts</div>
+                    <div class="kpi-value" id="kpi-priced-n">Loading...</div>
+                    <div class="kpi-subtext" id="kpi-priced-pct-subtext">Loading %...</div>
+                </div>
+                <!-- 3. Inventory Value -->
+                <div class="kpi-card inventory-value">
+                    <div class="kpi-label">Inventory Value</div>
+                    <div class="kpi-value" id="kpi-portfolio-val">Loading...</div>
+                    <div class="kpi-subtext">Total recommended value</div>
+                </div>
+                <!-- 4. Total Stock (Units) -->
+                <div class="kpi-card total-stock">
+                    <div class="kpi-label">Total Stock (Units)</div>
+                    <div class="kpi-value" id="kpi-total-physical-stock">Loading...</div>
+                    <div class="kpi-subtext">All physical units</div>
+                </div>
+                <!-- 5. Median Sell Time -->
+                <div class="kpi-card median-sell">
+                    <div class="kpi-label">Median Sell Time</div>
+                    <div class="kpi-value" id="kpi-typical-sell-time">Loading...</div>
+                    <div class="kpi-subtext">Typical selling window</div>
+                </div>
+                <!-- 6. High Demand Parts -->
+                <div class="kpi-card high-demand">
+                    <div class="kpi-label">High Demand Parts</div>
+                    <div class="kpi-value" id="kpi-high-demand-n">Loading...</div>
+                    <div class="kpi-subtext">Strong market demand</div>
+                </div>
+            </div>
+
+            <!-- Sales & Liquidity Forecast Section -->
+            <div class="forecast-section animate-fade-in delay-2">
+                <div class="forecast-header">
+                    <h3>Portfolio Turnover Timeline</h3>
+                    <p class="section-description">
+                        A portfolio-level view of when the current inventory is expected to convert into sales, using the
+                        granular turnover buckets from the pricing contract.
+                    </p>
+                </div>
+
+                <div class="turnover-timeline-panel">
+                    <div class="turnover-timeline-head">
+                        <div>
+                            <span class="forecast-label">Expected Sell-Through</span>
+                            <b id="portfolio-turnover-headline">Building timeline...</b>
+                            <span id="portfolio-turnover-subline">Summing turnover buckets...</span>
+                        </div>
+                        <div class="turnover-revenue-pill">
+                            <span>Forecast Priced Revenue</span>
+                            <strong id="portfolio-turnover-revenue">€—</strong>
+                        </div>
+                    </div>
+                    <div class="turnover-track" id="portfolio-turnover-track"></div>
+                    <div class="turnover-buckets" id="portfolio-turnover-buckets"></div>
+                </div>
+            </div>
+
+            <!-- Charts and Distributions Section -->
+            <div class="dashboard-charts-4col animate-fade-in delay-2" style="margin-top: 0.75rem;">
+                <!-- Chart 1: Inventory Value by Brand -->
+                <div class="chart-box" style="display: flex; flex-direction: column;">
+                    <h3>Inventory Value by Brand</h3>
+                    <p class="chart-description">Recommended value share per brand</p>
+                    <div
+                        style="flex: 1; display: flex; align-items: center; justify-content: center; min-height: 220px; position: relative;">
+                        <canvas id="brand-donut-chart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Chart 2: Price Distribution -->
+                <div class="chart-box" style="display: flex; flex-direction: column;">
+                    <h3>Price Distribution</h3>
+                    <p class="chart-description">Priced unique parts count by price tier</p>
+                    <div
+                        style="flex: 1; display: flex; align-items: center; justify-content: center; min-height: 220px; position: relative;">
+                        <canvas id="price-bar-chart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Chart 3: Sell Time Distribution -->
+                <div class="chart-box" style="display: flex; flex-direction: column;">
+                    <h3>Sell Time Distribution</h3>
+                    <p class="chart-description">Priced unique parts count by typical sell window</p>
+                    <div
+                        style="flex: 1; display: flex; align-items: center; justify-content: center; min-height: 220px; position: relative;">
+                        <canvas id="selltime-donut-chart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Chart 4: Top Calibers by Value -->
+                <div class="chart-box" style="display: flex; flex-direction: column;">
+                    <h3>Top Calibers by Value</h3>
+                    <p class="chart-description">Highest caliber stock values</p>
+                    <div style="flex: 1; overflow-x: auto; margin-top: 10px;">
+                        <table class="calibers-list-table" id="calibers-table"
+                            style="width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left;">
+                            <thead>
+                                <tr
+                                    style="border-bottom: 2px solid var(--color-border-soft); color: var(--color-text-muted); font-weight: 600;">
+                                    <th style="padding: 8px 4px;">Caliber</th>
+                                    <th style="padding: 8px 4px; text-align: right;">Parts</th>
+                                    <th style="padding: 8px 4px; text-align: right;">Value (€)</th>
+                                </tr>
+                            </thead>
+                            <tbody style="color: var(--color-text-primary);">
+                                <!-- Loaded dynamically via app.js -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. INVENTORY WORKSPACE PAGE -->
+        <section id="inventory-page" class="page-section hidden">
+            <div class="section-header">
+                <div class="inventory-section-title">INVENTORY — CLICK A PART FOR FULL TMV & TURNOVER</div>
+            </div>
+
+            <!-- Filter Controls Panel -->
+            <div class="filter-panel">
+                <div class="search-input-group">
+                    <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8" />
+                        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                    </svg>
+                    <input type="text" id="inventory-search"
+                        placeholder="Search by brand, caliber, part number, or ID...">
+                </div>
+                <div class="filter-controls">
+                    <select id="filter-brand">
+                        <option value="all">All Brands</option>
+                        <option value="Rolex">Rolex</option>
+                        <option value="Tudor">Tudor</option>
+                    </select>
+                    <select id="filter-confidence">
+                        <option value="all">All Pricing Confidence</option>
+                        <option value="HIGH">High Pricing Confidence</option>
+                        <option value="MEDIUM">Medium Pricing Confidence</option>
+                        <option value="LOW">Low Pricing Confidence</option>
+                    </select>
+                    <select id="filter-turnover">
+                        <option value="all">All Turnover Confidence</option>
+                        <option value="HIGH">High Turnover Confidence</option>
+                        <option value="MEDIUM">Medium Turnover Confidence</option>
+                        <option value="LOW">Low Turnover Confidence</option>
+                        <option value="INSUFFICIENT">Insufficient Sell-Time Evidence</option>
+                    </select>
+                    <select id="filter-availability">
+                        <option value="all">All Items (Priced & Unpriced)</option>
+                        <option value="priced">Priced Recommendations Only</option>
+                        <option value="unpriced">Awaiting Evidence Only</option>
+                    </select>
+                    <button id="btn-download-csv" class="download-btn" title="Download Full Inventory as CSV">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        <span>Download CSV</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Inventory Data Table -->
+            <div class="white-box table-container">
+                <table class="inventory-table" id="items-table">
+                    <thead>
+                        <tr class="table-header-row">
+                            <th class="sortable-header" data-sort="name" style="width: 32%">Part <span class="sort-icon"
+                                    id="sort-icon-name"></span></th>
+                            <th class="sortable-header" data-sort="stock" style="width: 10%">Stock <span
+                                    class="sort-icon" id="sort-icon-stock"></span></th>
+                            <th class="sortable-header" data-sort="tmv" style="width: 12%">TMV <span class="sort-icon"
+                                    id="sort-icon-tmv"></span></th>
+                            <th class="sortable-header" data-sort="confidence" style="width: 15%">Confidence <span
+                                    class="sort-icon" id="sort-icon-confidence"></span></th>
+                            <th class="sortable-header" data-sort="turnover" style="width: 15%">Turnover <span
+                                    class="sort-icon" id="sort-icon-turnover"></span></th>
+                            <th class="sortable-header" data-sort="basis" style="width: 16%">Basis <span
+                                    class="sort-icon" id="sort-icon-basis"></span></th>
+                        </tr>
+                    </thead>
+                    <tbody id="items-table-body">
+                        <tr>
+                            <td colspan="6" class="table-loading">Querying database...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Collapsible Unpriced/No Evidence Items Section -->
+            <div class="unpriced-section-container">
+                <div class="unpriced-section-header" id="unpriced-toggle-btn">
+                    <h3>Items Awaiting Evidence (<span id="unpriced-count-badge">0</span>)</h3>
+                    <span class="toggle-icon">▲</span>
+                </div>
+                <div class="unpriced-content-panel" id="unpriced-panel">
+                    <div class="unpriced-grid" id="unpriced-list-body">
+                        <!-- Unpriced items list dynamically generated -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. SPECIFIC DRILL-DOWN ITEM PAGE -->
+        <section id="detail-page" class="page-section hidden">
+            <!-- Redesigned Top Header Row -->
+            <div class="detail-header-row">
+                <div class="detail-header-left">
+                    <a href="#inventory" class="back-link" id="btn-back-to-inventory">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align: middle; margin-right: 4px;">
+                            <line x1="19" y1="12" x2="5" y2="12" />
+                            <polyline points="12 19 5 12 12 5" />
+                        </svg>
+                        Back to Results
+                    </a>
+                    <h1 class="profile-title" id="detail-title">Rolex 2030 — Part 4419</h1>
+                    <div class="detail-meta-badges">
+                        <span class="meta-badge">Brand: <strong id="detail-badge-brand">—</strong></span>
+                        <span class="meta-badge">Caliber: <strong id="detail-badge-caliber">—</strong></span>
+                        <span class="meta-badge">Condition: <strong id="detail-badge-condition">—</strong></span>
+                        <span class="meta-badge">Stock: <strong id="detail-badge-stock">—</strong></span>
+                        <span class="profile-id" id="detail-id" style="margin-left: 10px; display: none;">UID: —</span>
+                    </div>
+                </div>
+                <div class="detail-header-right">
+                    <button class="minimal-btn reset-sim-btn" id="btn-reset-simulator">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px; vertical-align:middle;">
+                            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                        </svg>
+                        Reset Simulation
+                    </button>
+                    <div class="recommended-price-box">
+                        <div class="rec-price-label-row">
+                            <span class="rec-price-label">Recommended Price</span>
+                            <span class="info-icon-hover" title="Target Market Value calculated by the pricing engine.">ⓘ</span>
+                        </div>
+                        <div class="rec-price-value-row">
+                            <b class="price-val" id="detail-price-main">€0.00</b>
+                            <span class="headlight-badge" id="detail-confidence-badge">—</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Redesigned Three-Column Grid per User Specification -->
+            <div class="detail-three-cols">
+                
+                <!-- COLUMN 1: Evidence, Selling Time & Recommendation (Left Column) -->
+                <div class="detail-column">
+                    <!-- Evidence Summary Card -->
+                    <div class="white-box evidence-card">
+                        <div class="card-header-row">
+                            <h3>Evidence Summary</h3>
+                            <span class="info-icon-hover" title="Verified active and sold market observations. Click a row to view all matching listings.">ⓘ</span>
+                        </div>
+                        
+                        <div class="evidence-list">
+                            <div class="evidence-row clickable-evidence-row" id="row-active-listings">
+                                <div class="evidence-row-left">
+                                    <span class="evidence-icon active-icon">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                            <line x1="9" y1="9" x2="15" y2="9"/>
+                                            <line x1="9" y1="13" x2="15" y2="13"/>
+                                            <line x1="9" y1="17" x2="13" y2="17"/>
+                                        </svg>
+                                    </span>
+                                    <span class="evidence-name">Active Listings</span>
+                                </div>
+                                <div class="evidence-row-right">
+                                    <strong class="evidence-num" id="evidence-active-count">0</strong>
+                                </div>
+                            </div>
+                            <div class="evidence-drilldown hidden" id="active-listings-drilldown"></div>
+
+                            <div class="evidence-row clickable-evidence-row" id="row-historical-sales">
+                                <div class="evidence-row-left">
+                                    <span class="evidence-icon sold-icon">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                            <circle cx="12" cy="12" r="10"/>
+                                            <line x1="12" y1="8" x2="12" y2="16"/>
+                                            <line x1="8" y1="12" x2="16" y2="12"/>
+                                        </svg>
+                                    </span>
+                                    <span class="evidence-name">Historical Sales</span>
+                                </div>
+                                <div class="evidence-row-right">
+                                    <strong class="evidence-num" id="evidence-sold-count">0</strong>
+                                </div>
+                            </div>
+                            <div class="evidence-drilldown hidden" id="historical-sales-drilldown"></div>
+                        </div>
+                    </div>
+
+                    <!-- Expected Selling Time Card -->
+                    <div class="white-box selling-time-card">
+                        <div class="card-header-row">
+                            <h3>Expected Selling Time</h3>
+                            <span class="info-icon-hover" title="Predicted median duration to sell stock under current market conditions.">ⓘ</span>
+                        </div>
+                        
+                        <div class="selling-time-duration-box">
+                            <b id="detail-turnover-days">— days</b>
+                        </div>
+                        
+                        <div class="timeline-visual-container">
+                            <div class="timeline-track">
+                                <div class="timeline-fill" id="timeline-fill-indicator" style="width: 50%;"></div>
+                                <div class="timeline-dot" id="timeline-dot-indicator" style="left: 50%;"></div>
+                            </div>
+                            <div class="timeline-labels">
+                                <span>0-7d</span>
+                                <span>8-30d</span>
+                                <span>31-90d</span>
+                                <span>91-183d</span>
+                                <span>184d+</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Business Recommendation Card -->
+                    <div class="white-box recommendation-card">
+                        <div class="card-header-row">
+                            <h3>Business Recommendation</h3>
+                            <span class="rec-shield-icon">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2f6b3a" stroke-width="2">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                                </svg>
+                            </span>
+                        </div>
+                        
+                        <div class="recommendation-bullets">
+                            <ul class="rec-list" id="business-recommendations-list">
+                                <li>
+                                    <span class="check-icon">✓</span>
+                                    <span class="rec-text">Calculating optimal recommendation...</span>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div class="legacy-recommendation-box" style="display:none;">
+                            <p id="detail-recommendation-reason">—</p>
+                            <span id="detail-turnover-prob">—</span>
+                            <span id="detail-stock">—</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- COLUMN 2: Price Simulation & Turnover Forecast (Middle Column) -->
+                <div class="detail-column">
+                    <!-- Price Simulation Card -->
+                    <div class="white-box simulation-card">
+                        <div class="card-header-row">
+                            <h3>Price Simulation</h3>
+                            <span class="info-icon-hover" title="Simulate the non-linear impact of price adjustments on selling velocity and expected revenue.">ⓘ</span>
+                        </div>
+                        
+                        <div class="sim-sliders-section">
+                            <div class="sim-slider-group">
+                                <div class="slider-labels-row">
+                                    <span class="slider-side-label">Adjust Price</span>
+                                    <span class="slider-center-val" id="slider-percentage-val">0%</span>
+                                </div>
+                                <div class="slider-track-container">
+                                    <span class="slider-track-bound">-20%</span>
+                                    <input type="range" id="price-simulator-slider" min="-20" max="20" step="5" value="0">
+                                    <span class="slider-track-bound">+20%</span>
+                                </div>
+                            </div>
+
+                            <div class="sim-slider-group">
+                                <div class="slider-labels-row">
+                                    <span class="slider-side-label">Adjust Selling Time</span>
+                                    <span class="slider-center-val" id="slider-days-val">— days</span>
+                                </div>
+                                <div class="slider-track-container">
+                                    <span class="slider-track-bound">Slow</span>
+                                    <input type="range" id="selling-time-slider" min="0" max="100" value="50" disabled>
+                                    <span class="slider-track-bound">Fast</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="sim-metrics-grid">
+                            <div class="sim-metric-box">
+                                <span class="sim-metric-label">Price Change</span>
+                                <strong class="sim-metric-value" id="sim-pct-change">0%</strong>
+                            </div>
+                            <div class="sim-metric-box">
+                                <span class="sim-metric-label">New Price</span>
+                                <strong class="sim-metric-value" id="sim-price-val">€0.00</strong>
+                            </div>
+                            <div class="sim-metric-box">
+                                <span class="sim-metric-label">Expected Units Sold</span>
+                                <strong class="sim-metric-value" id="sim-units-sold">0</strong>
+                            </div>
+                            <div class="sim-metric-box">
+                                <span class="sim-metric-label">Expected Revenue</span>
+                                <strong class="sim-metric-value" id="sim-revenue-val">€0.00</strong>
+                            </div>
+                        </div>
+                        
+                        <!-- Hidden legacy elements for JS compatibility -->
+                        <span id="sim-days-val" style="display:none;">— days</span>
+                        <span id="sim-fc-sold-30" style="display:none;">—</span>
+                        <span id="sim-fc-rev-30" style="display:none;">—</span>
+                        <span id="sim-fc-range-30" style="display:none;">—</span>
+                        <span id="sim-fc-sold-90" style="display:none;">—</span>
+                        <span id="sim-fc-rev-90" style="display:none;">—</span>
+                        <span id="sim-fc-range-90" style="display:none;">—</span>
+                        <span id="detail-potential-rev" style="display:none;">—</span>
+                    </div>
+
+                    <!-- Turnover Forecast Card -->
+                    <div class="white-box forecast-card">
+                        <div class="card-header-row">
+                            <h3 id="forecast-card-title">Turnover Forecast</h3>
+                            <span class="info-icon-hover" title="Expected stock sales distribution over time horizons using Monte Carlo simulations.">ⓘ</span>
+                        </div>
+                        
+                        <table class="forecast-table">
+                            <thead>
+                                <tr>
+                                    <th>Time to Sell</th>
+                                    <th style="text-align: right;">Units Sold</th>
+                                    <th style="text-align: right;">Revenue (Est.)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>0 - 30 days</td>
+                                    <td style="text-align: right;" id="fc-sold-30-val">0</td>
+                                    <td style="text-align: right;" id="fc-rev-30-val">€0.00</td>
+                                </tr>
+                                <tr>
+                                    <td>31 - 90 days</td>
+                                    <td style="text-align: right;" id="fc-sold-30-90-val">0</td>
+                                    <td style="text-align: right;" id="fc-rev-30-90-val">€0.00</td>
+                                </tr>
+                                <tr>
+                                    <td>91+ days</td>
+                                    <td style="text-align: right;" id="fc-sold-90-plus-val">0</td>
+                                    <td style="text-align: right;" id="fc-rev-90-plus-val">€0.00</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="forecast-footer">
+                            <div class="fc-footer-left">
+                                <span id="fc-remaining-units">0 units remaining</span>
+                                <span class="info-icon-hover" title="Units not forecasted to sell within 90 days.">ⓘ</span>
+                            </div>
+                            <div class="fc-footer-right">
+                                <span class="pot-rev-label">Potential Revenue</span>
+                                <strong id="fc-potential-revenue">€0.00</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- COLUMN 3: Calculation Breakdown & Scenario Breakdown (Right Column) -->
+                <div class="detail-column">
+                    <!-- Calculation Traceback Card -->
+                    <div class="white-box traceback-card">
+                        <div class="card-header-row">
+                            <h3>Calculation Traceback</h3>
+                            <span class="info-icon-hover" title="Trace of the TMV pricing formula components and adjustments.">ⓘ</span>
+                        </div>
+                        
+                        <div class="traceback-list">
+                            <div class="traceback-item">
+                                <span class="trace-label">Historical Market Value (H)</span>
+                                <span class="trace-value" id="trace-h-val">€0.00</span>
+                            </div>
+                            <div class="traceback-item">
+                                <span class="trace-label">Current Market Value (C)</span>
+                                <span class="trace-value" id="trace-c-val">€0.00</span>
+                            </div>
+                            <div class="traceback-item offset-item" style="display: none;">
+                                <span class="trace-label">Trend Adjustment (P)</span>
+                                <span class="trace-value" id="trace-p-val">0.0%</span>
+                            </div>
+                            <div class="traceback-item offset-item" style="display: none;">
+                                <span class="trace-label">Scarcity Adjustment (S)</span>
+                                <span class="trace-value" id="trace-s-val">0.50</span>
+                            </div>
+                            <div class="traceback-item">
+                                <span class="trace-label">Scarcity Adjustment (S)</span>
+                                <span class="trace-value adjust-plus" id="trace-s-val-adj">+€0.00</span>
+                            </div>
+                            <div class="traceback-item">
+                                <span class="trace-label">Trend Adjustment (T)</span>
+                                <span class="trace-value adjust-minus" id="trace-t-val-adj">-€0.00</span>
+                            </div>
+                            <div class="traceback-divider"></div>
+                            <div class="traceback-item final-row">
+                                <span class="trace-label">Recommended Price (TMV)</span>
+                                <b class="trace-value tmv-final" id="trace-final-val">€0.00</b>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Scenario Comparison Card -->
+                    <div class="white-box scenarios-card">
+                        <div class="card-header-row">
+                            <h3>Scenario Comparison</h3>
+                            <span class="info-icon-hover" title="Calculated landed price breakdowns across different shipping and tax profiles.">ⓘ</span>
+                        </div>
+                        
+                        <div class="scenarios-grid">
+                            <!-- Virtual Column -->
+                            <div class="scenario-col virtual">
+                                <span class="scen-col-title">Virtual Sale</span>
+                                <span class="scen-col-desc">No fees</span>
+                                <div class="scen-price-row">
+                                    <b class="scen-total-price" id="scen-c-landed">€0.00</b>
+                                </div>
+                                <div class="scenario-details-hidden" style="display:none;">
+                                    <span id="scen-c-base">€0.00</span>
+                                </div>
+                            </div>
+
+                            <!-- US Market Column -->
+                            <div class="scenario-col us">
+                                <span class="scen-col-title">US Market</span>
+                                <div class="scen-breakdown-list">
+                                    <div class="scen-breakdown-item">
+                                        <span>Base Price</span>
+                                        <span id="scen-a-base">€0.00</span>
+                                    </div>
+                                    <div class="scen-breakdown-item">
+                                        <span>Shipping</span>
+                                        <span id="scen-a-ship">€0.00</span>
+                                    </div>
+                                    <div class="scen-breakdown-item">
+                                        <span>Import duty</span>
+                                        <span id="scen-a-customs">€0.00</span>
+                                    </div>
+                                    <div class="scen-breakdown-item">
+                                        <span>Tax</span>
+                                        <span id="scen-a-tax">€0.00</span>
+                                    </div>
+                                </div>
+                                <div class="scen-total-row">
+                                    <span class="total-label">Customer Price</span>
+                                    <strong class="scen-total-price" id="scen-a-landed">€0.00</strong>
+                                </div>
+                                <div class="scen-source-row" id="scen-a-sources" style="display:none;">Sources: —</div>
+                            </div>
+
+                            <!-- Germany Column -->
+                            <div class="scenario-col de">
+                                <span class="scen-col-title">Germany</span>
+                                <div class="scen-breakdown-list">
+                                    <div class="scen-breakdown-item">
+                                        <span>Base Price</span>
+                                        <span id="scen-b-base">€0.00</span>
+                                    </div>
+                                    <div class="scen-breakdown-item">
+                                        <span>Shipping</span>
+                                        <span id="scen-b-ship">€0.00</span>
+                                    </div>
+                                    <div class="scen-breakdown-item">
+                                        <span>Import duty</span>
+                                        <span id="scen-b-customs">€0.00</span>
+                                    </div>
+                                    <div class="scen-breakdown-item" style="display: none;">
+                                        <span id="scen-b-tax">€0.00</span>
+                                    </div>
+                                </div>
+                                <div class="scen-total-row">
+                                    <span class="total-label">Customer Price</span>
+                                    <strong class="scen-total-price" id="scen-b-landed">€0.00</strong>
+                                </div>
+                                <div class="scen-source-row" id="scen-b-sources" style="display:none;">Sources: —</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. ADD / UPDATE ITEM PAGE -->
+        <section id="add-item-page" class="page-section hidden">
+            <div class="section-header animate-fade-in">
+                <h1>Add Item / Update Stock</h1>
+                <p class="subtitle">Manually add new vintage watch parts or update stock quantities in bulk.</p>
+            </div>
+
+            <!-- Tabs Navigation -->
+            <div class="tabs-container">
+                <button class="tab-btn active" id="tab-btn-single">Single Item Add / Update</button>
+                <button class="tab-btn" id="tab-btn-bulk">Bulk Inventory Update</button>
+            </div>
+
+            <!-- Tab 1 content: Single Add / Update -->
+            <div class="tab-content" id="tab-content-single">
+                <div class="grid-2col">
+                    <!-- Form side -->
+                    <div class="white-box">
+                        <h3>Single Item Manager</h3>
+                        <p class="section-description">Fill out Calibre and Part Number to retrieve existing stock
+                            levels or create a new part.</p>
+
+                        <form id="single-item-form" class="manager-form" onsubmit="return false;">
+                            <div class="form-group">
+                                <label for="single-brand">Brand</label>
+                                <select id="single-brand" class="form-control">
+                                    <option value="Rolex">Rolex</option>
+                                    <option value="Tudor">Tudor</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="single-caliber">Calibre</label>
+                                <input type="text" id="single-caliber" class="form-control" placeholder="e.g. 1030"
+                                    required autocomplete="off" />
+                            </div>
+
+                            <div class="form-group">
+                                <label for="single-part-number">Part Number</label>
+                                <input type="text" id="single-part-number" class="form-control"
+                                    placeholder="e.g. 6900/585" required autocomplete="off" />
+                            </div>
+
+                            <div class="form-group">
+                                <label for="single-stock" id="single-stock-label">Initial Stock Quantity</label>
+                                <input type="number" id="single-stock" class="form-control" min="0" value="0"
+                                    required />
+                                <small class="field-help" id="single-stock-help">
+                                    For a new item, enter the starting physical stock.
+                                </small>
+                            </div>
+
+                            <div class="form-group hidden" id="stock-mode-group">
+                                <label for="stock-mode">Stock Update Mode</label>
+                                <select id="stock-mode" class="form-control">
+                                    <option value="set">Set total stock to this number</option>
+                                    <option value="add">Add this many units to current stock</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" id="btn-single-submit" class="primary-btn" disabled>Add Item</button>
+                        </form>
+                    </div>
+
+                    <!-- Status / Feedback side -->
+                    <div class="white-box status-box">
+                        <h3>Item Status Info</h3>
+                        <div id="single-status-content" class="status-placeholder" style="width: 100%;">
+                            <span class="status-icon">ℹ</span>
+                            <p>Please enter Calibre and Part Number to check/add items.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 2 content: Bulk Update -->
+            <div class="tab-content hidden" id="tab-content-bulk">
+                <div class="white-box" style="max-width: 800px; margin: 0 auto;">
+                    <h3>Bulk Inventory Update via CSV</h3>
+                    <p class="section-description">
+                        Use this section to add new items or update stock numbers in bulk.
+                        Download the template below, populate your items, and upload the completed CSV file.
+                        All uploaded update files will be saved in the <code>bulk_update</code> folder on disk.
+                    </p>
+
+                    <div class="bulk-actions-row">
+                        <!-- Template download -->
+                        <a href="/api/template" class="secondary-btn" download="inventory_template.csv">
+                            Download Inventory Template
+                        </a>
+                    </div>
+
+                    <hr style="border: 0; border-top: 1px solid var(--color-border-soft); margin: 30px 0;" />
+
+                    <div class="form-group">
+                        <label for="bulk-file-input" class="file-upload-label">
+                            <strong>Upload CSV</strong>
+                            <input type="file" id="bulk-file-input" accept=".csv" />
+                        </label>
+                        <div id="bulk-file-info"
+                            style="margin-top: 10px; font-size: 0.9em; color: var(--color-text-muted); text-align: center;">
+                            No file selected
+                        </div>
+                    </div>
+
+                    <!-- Validation Summary Panel -->
+                    <div id="bulk-validation-panel" class="hidden" style="margin-top: 20px; padding: 15px; border-radius: var(--border-radius-sm); border: 1px solid var(--color-border-soft);">
+                        <!-- Populated by JS -->
+                    </div>
+
+                    <button id="btn-bulk-submit" class="primary-btn" style="margin-top: 20px; width: 100%;" disabled>
+                        Confirm Import
+                    </button>
+
+                    <div id="bulk-status-container" class="hidden"
+                        style="margin-top: 25px; padding: 15px; border-radius: var(--border-radius-sm);">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        <div class="footer-container">
+            <p>Vintage Watch Spare Parts — Valuation Intelligence Dashboard · 2026</p>
+        </div>
+    </footer>
+
+    <!-- App JavaScript -->
+    <script src="app.js"></script>
+</body>
+
+</html>
