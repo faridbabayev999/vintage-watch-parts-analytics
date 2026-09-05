@@ -2,10 +2,19 @@
 
 Automated pricing and market analysis tool for vintage watch spare parts.
 
-This repository contains the reproducible codebase, DuckDB database snapshot,
-custom dashboard, tests, and Excel inventory evaluation for the submitted
-project. The research paper is submitted separately and explains the analytical
-methodology in more depth.
+This repository contains the reproducible codebase, custom dashboard, tests, and
+Excel inventory evaluation for the submitted project. The research paper is
+submitted separately and explains the analytical methodology in more depth.
+
+> **Note on the database:** the large DuckDB snapshot (~1.6 GB,
+> `database/watchparts.duckdb`) is **not** included in this repository because it
+> exceeds GitHub's 100 MB file limit. Rebuild it locally from the pipeline — see
+> *Setup* and *Run The Pipeline* below (`python run_pipeline.py --full-rebuild`).
+
+## Team
+
+Group project for the MSc Data Analytics & Decision Science *Analytics Project*
+at RWTH Aachen — by Benjamin Arenas, Farid Babayev, and Vaishnavi Iyer.
 
 ## What This Project Does
 
@@ -78,8 +87,10 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-No eBay credentials are required for offline review because the submitted
-DuckDB snapshot is included.
+For fully offline review, first rebuild the DuckDB snapshot with
+`python run_pipeline.py --full-rebuild` (the snapshot itself is not committed
+here due to its size). No eBay credentials are needed to rebuild from the
+included raw data.
 
 Credentials are only needed if you want to refresh live eBay marketplace data.
 In that case:
@@ -226,6 +237,6 @@ Verified submission result:
   not that the part has no value.
 - Turnover is an evidence-based selling-horizon estimate, not a guaranteed sale
   date.
-- The included `database/watchparts.duckdb` file is intentionally committed in
-  this submission copy so the professor can run the dashboard offline without
-  eBay credentials.
+- The `database/watchparts.duckdb` snapshot is **not** committed to this public
+  repository because of its size (~1.6 GB). Rebuild it locally with
+  `python run_pipeline.py --full-rebuild` before running the dashboard.
